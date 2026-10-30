@@ -1,0 +1,15 @@
+import { Router } from 'express';
+import { addUpdate, createIssue, getIssue, listIssues, resolveIssue, summary, updateStatus } from '../controllers/issueController.js';
+import { allow, protect } from '../middleware/auth.js';
+import { validate } from '../middleware/validate.js';
+import { noteSchema, resolveSchema, statusSchema } from '../validators/schemas.js';
+import { upload, handleUploadError } from '../middleware/upload.js';
+const router = Router();
+router.get('/', protect, listIssues);
+router.get('/summary', summary);
+router.get('/:id', protect, getIssue);
+router.post('/', protect, allow('reporter'), upload.single('image'), handleUploadError, createIssue);
+router.patch('/:id/status', protect, allow('coordinator'), validate(statusSchema), updateStatus);
+router.post('/:id/updates', protect, allow('coordinator'), validate(noteSchema), addUpdate);
+router.patch('/:id/resolve', protect, allow('coordinator'), validate(resolveSchema), resolveIssue);
+export default router;
