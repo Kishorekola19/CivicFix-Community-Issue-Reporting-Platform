@@ -1,0 +1,2 @@
+import { MapPinOff } from 'lucide-react'; import { Link } from 'react-router-dom';
+export default function NotFound(){return <div className="grid min-h-screen place-items-center bg-slate-50 p-5"><div className="text-center"><MapPinOff className="mx-auto h-14 w-14 text-brand-500"/><p className="mt-5 text-sm font-bold text-brand-600">ERROR 404</p><h1 className="mt-2 text-4xl font-extrabold">Page not found</h1><p className="mt-3 text-slate-500">The CivicFix page you requested does not exist.</p><Link to="/" className="btn-primary mt-7">Go to home page</Link></div></div>}
