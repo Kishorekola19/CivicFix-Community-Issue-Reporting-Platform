@@ -18,7 +18,7 @@ export async function transitionIssue(issue, status, note, actorId, changes = {}
   if (status !== 'Resolved') { issue.resolvedAt = null; issue.resolutionNote = ''; }
   Object.assign(issue, changes);
   await issue.save();
-  try { await IssueUpdate.create({ issueId: issue._id, actorId, oldStatus, newStatus: status, note }); }
+  try { await IssueUpdate.create({ issueId: issue._id, actorId, oldStatus, newStatus: status, note, isReview: false }); }
   catch (error) { issue.status = oldStatus; issue.resolutionNote = oldResolutionNote; issue.resolvedAt = oldResolvedAt; await issue.save(); throw error; }
   return issue;
 }

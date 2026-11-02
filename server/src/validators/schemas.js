@@ -8,5 +8,10 @@ export const issueSchema = z.object({
   locationText: z.string().trim().min(3).max(160), priority: z.enum(PRIORITIES).default('Medium')
 });
 export const statusSchema = z.object({ status: z.enum(STATUSES), note: z.string().trim().max(1000).optional().default('') });
-export const noteSchema = z.object({ note: z.string().trim().min(2).max(1000) });
+export const noteSchema = z.object({
+  note: z.string().trim().min(2).max(1000),
+  rating: z.coerce.number().int().min(1).max(5).optional(),
+  isReview: z.boolean().optional(),
+  reviewStage: z.enum(['reporting', 'resolution']).optional()
+});
 export const resolveSchema = z.object({ resolutionNote: z.string().trim().min(5).max(1000) });
