@@ -2,11 +2,14 @@ import { ArrowUpRight, MapPin, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import StatusBadge from './StatusBadge';
 import { API_BASE } from '../lib/api';
+import { useAuth } from '../context/AuthContext';
 
 const priority = { Urgent: 'text-rose-600', High: 'text-orange-600', Medium: 'text-amber-600', Low: 'text-emerald-600' };
 const imgSrc = (url) => url?.startsWith('/uploads') ? `${API_BASE}${url}` : url;
 
 export default function IssueCard({ issue }) {
+  const { user } = useAuth();
+
   return (
     <Link to={`/issues/${issue._id}`} className="card group overflow-hidden transition hover:-translate-y-1 hover:shadow-xl">
       {issue.imageUrl && <img src={imgSrc(issue.imageUrl)} alt="" className="h-40 w-full object-cover" />}
@@ -14,7 +17,7 @@ export default function IssueCard({ issue }) {
         <div className="mb-3 flex items-center justify-between">
           <StatusBadge status={issue.status} />
           <div className="flex items-center gap-2">
-            {issue.isPotentialDuplicate && (
+            {user?.role === 'coordinator' && issue.isPotentialDuplicate && (
               <span className="inline-flex items-center gap-1 rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-700">
                 <AlertTriangle className="h-3 w-3" />
                 Duplicate?

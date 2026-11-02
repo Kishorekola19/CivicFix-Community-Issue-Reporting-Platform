@@ -95,11 +95,7 @@ export default function ReportIssue() {
       const { data } = await api.post('/issues', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      toast.success(
-        data.issue?.isPotentialDuplicate
-          ? 'Issue saved and flagged for coordinator review'
-          : 'Issue saved to CivicFix'
-      );
+      toast.success('Issue submitted successfully!');
       nav(`/issues/${data.issue._id}`);
     } catch (e) {
       toast.error(e.response?.data?.message || 'Could not submit issue');
@@ -150,7 +146,7 @@ export default function ReportIssue() {
                 </button>
               </div>
               <p className="mt-1 text-xs leading-5 text-amber-800">
-                Similar reports already exist for <strong>{form.category}</strong>. Review them before submitting to see if the problem is already being resolved.
+                Similar reports with matching title keywords were found. Review them before submitting to see if this issue is already being addressed.
               </p>
             </div>
           </div>

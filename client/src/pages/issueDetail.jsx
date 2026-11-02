@@ -104,7 +104,7 @@ export default function IssueDetail() {
             <StatusBadge status={issue.status} />
             <span className="text-xs font-bold uppercase text-orange-600">{issue.priority} priority</span>
             <span className="text-xs font-medium text-slate-400">{issue.category}</span>
-            {issue.isPotentialDuplicate && (
+            {user?.role === 'coordinator' && issue.isPotentialDuplicate && (
               <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-bold text-amber-800">
                 <AlertTriangle className="h-3.5 w-3.5" />
                 Duplicate Warning
@@ -127,15 +127,15 @@ export default function IssueDetail() {
         </div>
       </div>
 
-      {/* Duplicate Review Card (Only shows active, unsolved issues) */}
-      {duplicates.length > 0 && (
+      {/* Duplicate Review Card (Only shown to coordinators) */}
+      {user?.role === 'coordinator' && duplicates.length > 0 && (
         <div className="card mt-6 border-amber-200 bg-amber-50/40 p-6 sm:p-8">
           <div className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-amber-600" />
-            <h2 className="text-lg font-bold text-slate-900">Duplicate Review ({duplicates.length} Active Similar Reports)</h2>
+            <h2 className="text-lg font-bold text-slate-900">Coordinator Review: Duplicate Management ({duplicates.length} Active Similar Reports)</h2>
           </div>
           <p className="mt-1 text-xs text-slate-500">
-            The system detected {duplicates.length} other active unresolved issue(s) with matching keywords or location. Coordinators can review to prevent duplicate dispatching.
+            The system detected {duplicates.length} other active unresolved issue(s) with matching category, block, and title keywords. Coordinators can review to prevent duplicate dispatching.
           </p>
 
           <div className="mt-4 space-y-3">

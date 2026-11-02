@@ -24,6 +24,13 @@ export const AuthProvider = ({ children }) => {
       .finally(() => setLoading(false));
   }, []);
   const authenticate = async (path, values) => { const { data } = await api.post(`/auth/${path}`, values); localStorage.setItem('civicfix_token', data.token); localStorage.setItem('civicfix_user', JSON.stringify(data.user)); setUser(data.user); return data.user; };
+  const loginWithGoogle = async (credential, role, mockUser) => {
+    const { data } = await api.post('/auth/google', { credential, role, mockUser });
+    localStorage.setItem('civicfix_token', data.token);
+    localStorage.setItem('civicfix_user', JSON.stringify(data.user));
+    setUser(data.user);
+    return data.user;
+  };
   const logout = async () => { try { await api.post('/auth/logout'); } finally { localStorage.removeItem('civicfix_token'); localStorage.removeItem('civicfix_user'); setUser(null); } };
   const continueAsViewer = async () => {
     try {
@@ -42,6 +49,6 @@ export const AuthProvider = ({ children }) => {
       return guest;
     }
   };
-  return <AuthContext.Provider value={{ user, loading, login: v => authenticate('login', v), register: v => authenticate('register', v), logout, continueAsViewer }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ user, loading, login: v => authenticate('login', v), register: v => authenticate('register', v), loginWithGoogle, logout, continueAsViewer }}>{children}</AuthContext.Provider>;
 };
 export const useAuth = () => useContext(AuthContext);
