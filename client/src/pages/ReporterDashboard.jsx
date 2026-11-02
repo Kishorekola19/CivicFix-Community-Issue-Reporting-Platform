@@ -1,4 +1,4 @@
-import { ArrowRight, CheckCircle2, Clock3, FilePlus2, ListChecks, MapPin, Megaphone, Plus, Search, UsersRound } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Clock3, FilePlus2, ListChecks, MapPin, Megaphone, Plus, Search, UsersRound, Star } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../lib/api';
@@ -11,14 +11,20 @@ export default function ReporterDashboard() {
   const { user } = useAuth();
   const [issues, setIssues] = useState([]);
   const [community, setCommunity] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    Promise.all([api.get('/me/issues'), api.get('/issues', { params: { limit: 5 } })])
-      .then(([mine, all]) => {
+    Promise.all([
+      api.get('/me/issues'),
+      api.get('/issues', { params: { limit: 5 } }),
+      api.get('/issues/reviews').catch(() => ({ data: { reviews: [] } }))
+    ])
+      .then(([mine, all, revs]) => {
         setIssues(mine.data.issues || []);
         setCommunity((all.data.issues || []).slice(0, 3));
+        setReviews((revs.data?.reviews || []).slice(0, 4));
       })
       .catch(e => setError(e.response?.data?.message || 'Could not load your dashboard'))
       .finally(() => setLoading(false));
@@ -51,6 +57,27 @@ export default function ReporterDashboard() {
       </div>
     </section>
 
+    {issues.some(i => i.status === 'Resolved') && (
+      <section className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-amber-200 bg-amber-50/80 p-5 shadow-sm">
+        <div className="flex items-center gap-3">
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-amber-500 text-white shadow-sm">
+            <Star className="h-5 w-5 fill-white text-white" />
+          </span>
+          <div>
+            <h3 className="font-bold text-slate-900">Resolved Reports Waiting for Review</h3>
+            <p className="text-xs text-slate-600">Rate the resolution work and leave a community review to let teams know how the fix went.</p>
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {issues.filter(i => i.status === 'Resolved').slice(0, 3).map(r => (
+            <Link key={r._id} to={`/issues/${r._id}`} className="rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-amber-700">
+              Review: {r.title.slice(0, 22)}… ⭐
+            </Link>
+          ))}
+        </div>
+      </section>
+    )}
+
     <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {cards.map(([Icon,label,value,color,to]) => <Link to={to} className="card group flex items-center gap-4 p-5 transition hover:-translate-y-1 hover:shadow-lg" key={label}>
         <span className={`grid h-14 w-14 shrink-0 place-items-center rounded-full ${color}`}><Icon className="h-6 w-6"/></span>
@@ -69,6 +96,36 @@ export default function ReporterDashboard() {
       </section>
 
       <aside className="space-y-5">
+        <section className="card p-5">
+          <div className="flex items-center justify-between">
+            <h2 className="flex items-center gap-2 font-extrabold text-sm">
+              <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+              Community Reviews
+            </h2>
+            <Link to="/viewer" className="text-xs font-bold text-brand-600">View all</Link>
+          </div>
+          <p className="mt-1 text-xs text-slate-500">Real feedback from reporters.</p>
+          <div className="mt-4 space-y-3">
+            {reviews.length ? reviews.map(rev => (
+              <div key={rev._id} className="rounded-xl border border-slate-100 bg-slate-50 p-3">
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-1 text-xs font-bold text-amber-600">
+                    ★ {rev.rating || 5}/5
+                  </span>
+                  <span className="text-[10px] text-slate-400">{new Date(rev.createdAt).toLocaleDateString()}</span>
+                </div>
+                <p className="mt-1 line-clamp-2 text-xs text-slate-700 italic">"{rev.note}"</p>
+                <div className="mt-1.5 flex items-center justify-between text-[11px] text-slate-500">
+                  <span className="font-semibold text-slate-700">{rev.author?.name || 'Reporter'}</span>
+                  {rev.issue?.title && <span className="truncate max-w-[120px] text-slate-400">{rev.issue.title}</span>}
+                </div>
+              </div>
+            )) : (
+              <p className="py-2 text-xs text-slate-400">No community reviews yet.</p>
+            )}
+          </div>
+        </section>
+
         <section className="card p-5"><div className="flex items-center justify-between"><h2 className="flex items-center gap-2 font-extrabold"><UsersRound className="h-5 w-5 text-brand-600"/>Community activity</h2><Link to="/issues" className="text-xs font-bold text-brand-600">View all</Link></div><p className="mt-1 text-xs text-slate-500">Latest issues from your community.</p><div className="mt-4 space-y-4">{community.length?community.map(issue=><Link to={`/issues/${issue._id}`} className="flex items-center gap-3" key={issue._id}><span className="grid h-12 w-14 shrink-0 place-items-center overflow-hidden rounded-lg bg-slate-100">{issue.imageUrl?<img src={issue.imageUrl} alt="" className="h-full w-full object-cover"/>:<Megaphone className="h-4 w-4 text-brand-500"/>}</span><span className="min-w-0 flex-1"><b className="block truncate text-sm">{issue.title}</b><span className="block truncate text-xs text-slate-500">{issue.locationText}</span></span><StatusBadge status={issue.status}/></Link>):<p className="py-4 text-sm text-slate-400">No community activity yet.</p>}</div></section>
         <section className="card p-5"><h2 className="font-extrabold">Quick links</h2><div className="mt-4 grid gap-3">{[[ListChecks,'My reports','/my-reports'],[UsersRound,'Community feed','/issues'],[Search,'Track issue progress','/my-reports']].map(([Icon,label,to])=><Link to={to} className="flex items-center gap-3 rounded-xl bg-slate-50 p-3 text-sm font-bold transition hover:bg-brand-50 hover:text-brand-700" key={label}><Icon className="h-5 w-5 text-brand-600"/>{label}<ArrowRight className="ml-auto h-4 w-4 text-slate-400"/></Link>)}</div></section>
       </aside>

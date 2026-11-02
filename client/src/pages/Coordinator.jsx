@@ -128,26 +128,45 @@ export default function Coordinator() {
 
       {error ? <div className="p-12 text-center"><p className="font-bold text-rose-700">Unable to load issues</p><p className="mt-1 text-sm text-slate-500">{error}</p><button className="btn-secondary mt-4" onClick={load}>Try again</button></div>
         : loading ? <div className="p-16 text-center text-slate-400">Loading issues…</div>
-        : issues.length === 0 ? <div className="p-16 text-center"><SlidersHorizontal className="mx-auto h-10 w-10 text-slate-300" /><h3 className="mt-3 font-bold">No matching issues</h3><p className="mt-1 text-sm text-slate-500">Try changing or clearing the filters.</p></div>
-        : <>
-          <div className="divide-y divide-slate-100 lg:hidden">
-            {issues.map(issue => <div className="p-5" key={issue._id}>
-              <div className="flex items-start justify-between gap-3"><div><h3 className="font-bold">{issue.title}</h3><p className="mt-1 text-sm text-slate-500">{issue.category} · {issue.locationText}</p></div><StatusBadge status={issue.status} /></div>
-              <p className="mt-3 line-clamp-2 text-sm text-slate-500">{issue.description}</p>
-              <div className="mt-4 grid grid-cols-2 gap-3"><Link className="btn-secondary" to={`/issues/${issue._id}`}>View details</Link><button className="btn-primary" onClick={() => openUpdate(issue)}>Update status</button></div>
-            </div>)}
-          </div>
-          <div className="hidden lg:block">
-            <table className="w-full table-fixed text-left text-sm">
-              <colgroup><col className="w-[25%]" /><col className="w-[11%]" /><col className="w-[17%]" /><col className="w-[9%]" /><col className="w-[12%]" /><col className="w-[11%]" /><col className="w-[15%]" /></colgroup>
-              <thead className="bg-slate-50 text-xs uppercase text-slate-500"><tr>{['Issue', 'Category', 'Location', 'Priority', 'Status', 'Date', 'Actions'].map(heading => <th className="px-3 py-3" key={heading}>{heading}</th>)}</tr></thead>
-              <tbody>{issues.map(issue => <tr className="border-t border-slate-100 align-top" key={issue._id}>
-                <td className="px-3 py-4"><p className="font-bold">{issue.title}</p><p className="mt-1 line-clamp-2 text-xs leading-5 text-slate-500">{issue.description}</p></td><td className="break-words px-3 py-4 text-slate-500">{issue.category}</td><td className="break-words px-3 py-4 text-slate-500">{issue.locationText}</td><td className="px-3 py-4">{issue.priority}</td><td className="px-3 py-4"><StatusBadge status={issue.status} /></td><td className="whitespace-nowrap px-3 py-4 text-slate-500">{new Date(issue.createdAt).toLocaleDateString()}</td>
-                <td className="px-3 py-4"><div className="flex flex-col items-start gap-2 whitespace-nowrap"><button className="font-bold text-brand-600" onClick={() => openUpdate(issue)}>Update status</button><Link className="font-semibold text-slate-500" to={`/issues/${issue._id}`}>View details</Link></div></td>
-              </tr>)}</tbody>
-            </table>
-          </div>
-        </>}
+          : issues.length === 0 ? <div className="p-16 text-center"><SlidersHorizontal className="mx-auto h-10 w-10 text-slate-300" /><h3 className="mt-3 font-bold">No matching issues</h3><p className="mt-1 text-sm text-slate-500">Try changing or clearing the filters.</p></div>
+            : <>
+              <div className="divide-y divide-slate-100 lg:hidden">
+                {issues.map(issue => <div className="p-5" key={issue._id}>
+                  <div className="flex items-start justify-between gap-3"><div>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <h3 className="font-bold">{issue.title}</h3>
+                      {issue.isPotentialDuplicate && (
+                        <span className="inline-flex items-center gap-0.5 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-800">
+                          Duplicate?
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-1 text-sm text-slate-500">{issue.category} · {issue.locationText}</p></div><StatusBadge status={issue.status} /></div>
+                  <p className="mt-3 line-clamp-2 text-sm text-slate-500">{issue.description}</p>
+                  <div className="mt-4 grid grid-cols-2 gap-3"><Link className="btn-secondary" to={`/issues/${issue._id}`}>View details</Link><button className="btn-primary" onClick={() => openUpdate(issue)}>Update status</button></div>
+                </div>)}
+              </div>
+              <div className="hidden lg:block">
+                <table className="w-full table-fixed text-left text-sm">
+                  <colgroup><col className="w-[25%]" /><col className="w-[11%]" /><col className="w-[17%]" /><col className="w-[9%]" /><col className="w-[12%]" /><col className="w-[11%]" /><col className="w-[15%]" /></colgroup>
+                  <thead className="bg-slate-50 text-xs uppercase text-slate-500"><tr>{['Issue', 'Category', 'Location', 'Priority', 'Status', 'Date', 'Actions'].map(heading => <th className="px-3 py-3" key={heading}>{heading}</th>)}</tr></thead>
+                  <tbody>{issues.map(issue => <tr className="border-t border-slate-100 align-top" key={issue._id}>
+                    <td className="px-3 py-4">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <p className="font-bold">{issue.title}</p>
+                        {issue.isPotentialDuplicate && (
+                          <span className="inline-flex items-center gap-0.5 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-800">
+                            Duplicate?
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-1 line-clamp-2 text-xs leading-5 text-slate-500">{issue.description}</p>
+                    </td><td className="break-words px-3 py-4 text-slate-500">{issue.category}</td><td className="break-words px-3 py-4 text-slate-500">{issue.locationText}</td><td className="px-3 py-4">{issue.priority}</td><td className="px-3 py-4"><StatusBadge status={issue.status} /></td><td className="whitespace-nowrap px-3 py-4 text-slate-500">{new Date(issue.createdAt).toLocaleDateString()}</td>
+                    <td className="px-3 py-4"><div className="flex flex-col items-start gap-2 whitespace-nowrap"><button className="font-bold text-brand-600" onClick={() => openUpdate(issue)}>Update status</button><Link className="font-semibold text-slate-500" to={`/issues/${issue._id}`}>View details</Link></div></td>
+                  </tr>)}</tbody>
+                </table>
+              </div>
+            </>}
     </section>
 
     {selected && <div className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-4" onMouseDown={() => !saving && setSelected(null)}>

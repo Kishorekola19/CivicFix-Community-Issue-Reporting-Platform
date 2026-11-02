@@ -10,14 +10,15 @@ const features = [[Plus,'Easy Issue Reporting','Report problems with clear detai
 export default function Landing() {
   const { user } = useAuth();
   const [summary,setSummary] = useState({total:0,open:0,byStatus:{'In Progress':0,Resolved:0}});
-  useEffect(()=>{api.get('/issues/summary').then(({data})=>setSummary(data)).catch(()=>{});},[]);
+  const [reviews,setReviews] = useState([]);
+  useEffect(()=>{api.get('/issues/summary').then(({data})=>setSummary(data)).catch(()=>{});api.get('/issues/reviews').then(({data})=>setReviews(data.reviews||[])).catch(()=>{});},[]);
   const destination = user?.role==='coordinator'?'/coordinator':user?.role==='reporter'?'/dashboard':user?.role==='viewer'?'/viewer':'/login';
   const reportTo = user?.role==='reporter'?'/report':'/register';
   return <div className="min-h-screen bg-white text-ink">
-    <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/95 backdrop-blur"><nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5"><Link to="/" className="flex items-center gap-2 text-xl font-extrabold"><span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-emerald-500 to-brand-600 text-white"><Leaf className="h-5 w-5"/></span><span>Civic<span className="text-brand-600">Fix</span></span></Link><div className="hidden items-center gap-7 text-sm font-semibold text-slate-600 md:flex"><a className="text-brand-600" href="#home">Home</a><a href="#how">How It Works</a><Link to="/login">Explore Issues</Link><a href="#impact">About</a></div><div className="flex items-center gap-2">{user?<Link className="btn-primary hidden sm:flex" to={destination}>Open dashboard</Link>:<><Link className="btn-secondary hidden sm:flex" to="/login">Sign in</Link><Link className="btn-primary" to="/register">Get started <ArrowRight className="h-4 w-4"/></Link></>}</div></nav></header>
+    <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/95 backdrop-blur"><nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5"><Link to="/" className="flex items-center gap-2 text-xl font-extrabold"><span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-emerald-500 to-brand-600 text-white"><Leaf className="h-5 w-5"/></span><span>Civic<span className="text-brand-600">Fix</span></span></Link><div className="hidden items-center gap-7 text-sm font-semibold text-slate-600 md:flex"><a className="text-brand-600" href="#home">Home</a><a href="#how">How It Works</a><Link to="/viewer">Explore Issues</Link><a href="#impact">About</a></div><div className="flex items-center gap-2">{user?<Link className="btn-primary hidden sm:flex" to={destination}>Open dashboard</Link>:<><Link className="btn-secondary hidden sm:flex" to="/login">Sign in</Link><Link className="btn-primary" to="/register">Get started <ArrowRight className="h-4 w-4"/></Link></>}</div></nav></header>
 
     <main className="overflow-x-clip">
-      <section id="home" className="border-b border-slate-100 bg-gradient-to-b from-brand-50 to-white"><div className="mx-auto max-w-5xl px-5 py-20 text-center lg:py-24"><span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-brand-700 shadow-sm"><Sparkles className="h-4 w-4"/>Community maintenance made simple</span><h1 className="mt-6 text-4xl font-extrabold tracking-tight sm:text-6xl">Report community issues.<br/><span className="text-brand-600">Track every update.</span></h1><p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-slate-600">A simple way to report maintenance problems and follow their progress from submission to resolution.</p><div className="mt-8 flex flex-wrap justify-center gap-3"><Link to={reportTo} className="btn-primary px-6 py-3.5"><Plus className="h-4 w-4"/>Report an issue</Link><Link to={user?destination:'/login'} className="btn-secondary px-6 py-3.5"><Search className="h-4 w-4"/>Explore issues</Link></div></div></section>
+      <section id="home" className="border-b border-slate-100 bg-gradient-to-b from-brand-50 to-white"><div className="mx-auto max-w-5xl px-5 py-20 text-center lg:py-24"><span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-brand-700 shadow-sm"><Sparkles className="h-4 w-4"/>Community maintenance made simple</span><h1 className="mt-6 text-4xl font-extrabold tracking-tight sm:text-6xl">Report community issues.<br/><span className="text-brand-600">Track every update.</span></h1><p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-slate-600">A simple way to report maintenance problems and follow their progress from submission to resolution.</p><div className="mt-8 flex flex-wrap justify-center gap-3"><Link to={reportTo} className="btn-primary px-6 py-3.5"><Plus className="h-4 w-4"/>Report an issue</Link><Link to="/viewer" className="btn-secondary px-6 py-3.5"><Search className="h-4 w-4"/>Explore issues</Link></div></div></section>
 
       <section className="relative z-10 mx-auto -mt-12 max-w-7xl px-5"><div className="card p-5 shadow-xl"><div className="mb-4 flex flex-wrap items-center justify-between gap-2"><h2 className="font-bold">Live community activity</h2><span className="text-xs text-slate-500"><b className="text-emerald-500">●</b> Real-time totals from community reports</span></div><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{[[ClipboardList,summary.total,'Total reports','bg-blue-50 text-blue-700'],[Sparkles,summary.open,'Open reports','bg-orange-50 text-orange-700'],[Wrench,summary.byStatus?.['In Progress']||0,'In progress','bg-violet-50 text-violet-700'],[CheckCircle2,summary.byStatus?.Resolved||0,'Resolved','bg-emerald-50 text-emerald-700']].map(([Icon,n,label,color])=><div className={`flex items-center gap-4 rounded-2xl p-4 ${color}`} key={label}><span className="grid h-11 w-11 place-items-center rounded-full bg-white/80"><Icon className="h-5 w-5"/></span><div><b className="text-2xl">{n}</b><p className="text-sm opacity-80">{label}</p></div></div>)}</div></div></section>
 
@@ -26,10 +27,56 @@ export default function Landing() {
 
       <section id="impact" className="bg-slate-50 py-16"><div className="mx-auto max-w-5xl px-5 text-center"><p className="text-sm font-bold uppercase tracking-widest text-brand-600">Our impact</p><h2 className="mt-3 text-3xl font-extrabold sm:text-4xl">Cleaner places. Safer communities.</h2><p className="mx-auto mt-4 max-w-2xl leading-7 text-slate-500">CivicFix turns everyday concerns into visible, accountable improvements.</p><div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{['Cleaner surroundings','Safer communities','More accountability','Happier neighbours'].map(x=><div className="card flex items-center gap-3 p-4 text-left text-sm font-semibold" key={x}><CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500"/>{x}</div>)}</div></div></section>
 
-      <section className="mx-auto max-w-7xl px-5 py-16"><div className="text-center"><h2 className="text-3xl font-extrabold">What Community Members Say</h2><p className="mt-2 text-slate-500">Real stories from people making a difference.</p></div><div className="mt-8 grid gap-5 md:grid-cols-3">{[['“CivicFix makes reporting simple and the updates are clear.”','Priya S.'],['“I can follow every issue and see real improvements in our area.”','Rahul M.'],['“It brings transparency and accountability to community maintenance.”','Meera R.']].map(([quote,name])=><blockquote className="card p-6" key={name}><p className="leading-7 text-slate-600">{quote}</p><div className="mt-5 flex items-center justify-between"><b>{name}</b><span className="text-amber-400">★★★★★</span></div></blockquote>)}</div>
+      <section className="mx-auto max-w-7xl px-5 py-16">
+        <div className="text-center">
+          <p className="text-xs font-bold uppercase tracking-wider text-brand-600">Community Feedback</p>
+          <h2 className="mt-2 text-3xl font-extrabold">Real Reporter Reviews</h2>
+          <p className="mt-2 text-slate-500">Genuine feedback, star ratings, and resolution reviews submitted by community residents.</p>
+        </div>
+        {reviews.length > 0 ? (
+          <div className="mt-8 grid gap-5 md:grid-cols-3">
+            {reviews.slice(0, 6).map(rev => (
+              <blockquote className="card flex flex-col justify-between p-6 shadow-sm hover:shadow-md transition" key={rev._id}>
+                <div>
+                  <div className="flex items-center gap-1 text-amber-400">
+                    {[1, 2, 3, 4, 5].map(s => (
+                      <span key={s} className={`text-base ${s <= (rev.rating || 5) ? 'text-amber-400' : 'text-slate-200'}`}>★</span>
+                    ))}
+                    <span className="ml-1 text-xs font-bold text-slate-600">({rev.rating || 5}/5)</span>
+                    <span className={`ml-auto rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                      rev.reviewStage === 'resolution' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800'
+                    }`}>
+                      {rev.reviewStage === 'resolution' ? 'Resolution' : 'Report'}
+                    </span>
+                  </div>
+                  <p className="mt-3 leading-relaxed text-slate-700 italic">“{rev.note}”</p>
+                  {rev.issue?.title && (
+                    <p className="mt-2 text-xs font-semibold text-brand-600 truncate">
+                      Re: {rev.issue.title} {rev.issue.locationText ? `(${rev.issue.locationText})` : ''}
+                    </p>
+                  )}
+                </div>
+                <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-3 text-xs text-slate-500">
+                  <div>
+                    <b className="block text-slate-800">{rev.author?.name || 'Community Member'}</b>
+                    <span className="text-[11px] capitalize text-slate-400">{rev.author?.role || 'reporter'}</span>
+                  </div>
+                  <span>{new Date(rev.createdAt).toLocaleDateString()}</span>
+                </div>
+              </blockquote>
+            ))}
+          </div>
+        ) : (
+          <div className="mt-8 card p-10 text-center max-w-xl mx-auto">
+            <h3 className="font-bold text-slate-800">No community reviews yet</h3>
+            <p className="mt-2 text-sm text-slate-500">
+              When reported issues are resolved and rated by community members, their genuine feedback and stars will appear here.
+            </p>
+          </div>
+        )}
       </section>
     </main>
 
-    <footer className="border-t border-slate-100 bg-white"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-5 px-5 py-8"><div className="flex items-center gap-2 font-extrabold"><Leaf className="text-teal-600"/>CivicFix</div><div className="flex gap-5 text-sm text-slate-500"><a href="#home">Home</a><a href="#how">How It Works</a><Link to="/login">Explore Issues</Link><a href="#impact">About</a></div><p className="text-xs text-slate-400">© 2026 CivicFix. All rights reserved.</p></div></footer>
+    <footer className="border-t border-slate-100 bg-white"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-5 px-5 py-8"><div className="flex items-center gap-2 font-extrabold"><Leaf className="text-teal-600"/>CivicFix</div><div className="flex gap-5 text-sm text-slate-500"><a href="#home">Home</a><a href="#how">How It Works</a><Link to="/viewer">Explore Issues</Link><a href="#impact">About</a></div><p className="text-xs text-slate-400">© 2026 CivicFix. All rights reserved.</p></div></footer>
   </div>;
 }

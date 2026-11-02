@@ -4,15 +4,25 @@ import toast from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-const roles = ['reporter', 'coordinator', 'viewer'];
+const roles = ['reporter', 'coordinator'];
 
 export default function AuthPage({ mode }) {
   const register = mode === 'register';
-  const { login, register: signup } = useAuth();
+  const { login, register: signup, continueAsViewer } = useAuth();
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({ name: '', email: '', password: '', role: 'reporter' });
+
+  const handleGuestViewer = async () => {
+    setBusy(true);
+    try {
+      if (continueAsViewer) await continueAsViewer();
+      navigate('/viewer');
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const submit = async event => {
     event.preventDefault();
@@ -41,6 +51,7 @@ export default function AuthPage({ mode }) {
           <div><label className="label" htmlFor="auth-email">Email address</label><div className="relative"><Mail className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-400"/><input id="auth-email" className="field pl-11" type="email" autoComplete="email" required value={form.email} onChange={event=>setForm({...form,email:event.target.value})}/></div></div>
           <div><label className="label" htmlFor="auth-password">Password</label><div className="relative"><LockKeyhole className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-400"/><input id="auth-password" className="field px-11" type={showPassword?'text':'password'} autoComplete={register?'new-password':'current-password'} required minLength="8" value={form.password} onChange={event=>setForm({...form,password:event.target.value})}/><button type="button" aria-label={showPassword?'Hide password':'Show password'} className="absolute right-3 top-3 rounded-lg p-1 text-slate-400" onClick={()=>setShowPassword(value=>!value)}>{showPassword?<EyeOff className="h-5 w-5"/>:<Eye className="h-5 w-5"/>}</button></div><p className="mt-1.5 text-xs text-slate-400">At least 8 characters, including a letter and number.</p></div>
           <button disabled={busy} className="btn-primary w-full py-3.5">{busy?'Please wait…':register?'Create account':`Sign in as ${form.role}`}<ArrowRight className="h-4 w-4"/></button>
+          {!register && <button type="button" disabled={busy} onClick={handleGuestViewer} className="btn-secondary w-full py-3.5">Continue as Viewer</button>}
         </div>
         <p className="mt-6 text-center text-sm text-slate-500">{register?'Already have an account?':'New to CivicFix?'} <Link className="font-bold text-brand-600" to={register?'/login':'/register'}>{register?'Sign in':'Create an account'}</Link></p>
       </form>
