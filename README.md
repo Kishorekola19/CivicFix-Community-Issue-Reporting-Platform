@@ -16,9 +16,7 @@ CivicFix is a community platform that lets residents report local civic issues, 
 - [API Overview](#api-overview)
 - [Deployment](#deployment)
 - [Team](#team)
-- [Contributing](#contributing)
-- [Development Status](#development-status)
-- [License](#license)
+
 
 ---
 
