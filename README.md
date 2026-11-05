@@ -97,21 +97,9 @@ The app will open at `http://localhost:3000`.
 
 ## Environment Variables
 
-Create a `.env` file inside `server/` (adjust names to match your code):
+Create a `.env` file inside `server/` (adjust names to match your code)
 
-```env
-PORT=5000
-MONGO_URI=mongodb://localhost:27017/civicfix
-JWT_SECRET=your_jwt_secret_here
-CLIENT_URL=http://localhost:3000
-```
-
-And, if the client needs one, inside `client/`:
-
-```env
-REACT_APP_API_URL=http://localhost:5000/api
-```
-
+And, if the client needs one, inside `client/`
 
 ## Available Scripts
 
